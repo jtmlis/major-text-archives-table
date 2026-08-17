@@ -10,7 +10,7 @@ https://lant.nt.gov.au/,https://nt.gov.au/,state,library,Australia,Library & Arc
 https://www.library.act.gov.au/,http://act.gov.au/,state,library,Australia,ACT Heritage Library,,no,,,,,,,,,,,,,,,
 https://libraries.tas.gov.au/,http://tas.gov.au/,state,library,Australia,State Library of Tasmania,,no,,,,,,,,,,,,,,,
 https://www.catalog.slsa.sa.gov.au/,https://www.sa.gov.au/,state,library,Australia,State Library of South Australia,,yes,,,,,,,,,,308 000 000,,,,,
-https://www.slq.qld.gov.au/,https://www.qld.gov.au/,state,library,Australia,State Library of Queensland,,,,,,,,,,,,,,,,,
+library website,base url,type,type 2,country,name,available,wildcards,funding ,size,total collection,books,journals,gov-docs,media,dissertations,archival-manuscripts,newspaper-articles,,subset of,duplicate of,original,bulk data
 https://www.sl.nsw.gov.au/,https://www.sa.gov.au/,state,library,Australia,State Library of New South Wales,,,,,,,,,,,,,,,,,
 https://gutenberg.net.au/,https://gutenberg.net.au/,open,library,Australia,Project Gutenberg Australia,,,,,,,44 000 000,,,,,,,,,,
 https://pandora.nla.gov.au/,https://www.library.gov.au/,national,web archive,Australia,Pandora archive,,,,,,,,,,,,,,,,,
@@ -59,3 +59,4 @@ https://www.westernsydney.edu.au/library,https://www.westernsydney.edu.au/,acade
 https://www.divinity.edu.au/library/,https://www.divinity.edu.au/,academic,library,Australia,University of Divinity Library,,,,,,,,,,,,,,,,,
 https://archives.anu.edu.au/,https://www.anu.edu.au/,academic,archive,Australia,Australian National University Library,,,,,,,,,,,269727,,,,,,
 https://www.bom.gov.au/library/,https://www.bom.gov.au/,national,library,Australia,National Meteorological Library,,,,,,,,,,,,,,Trove,Trove,,
+https://www.austlii.edu.au/,https://www.austlii.edu.au/,Legal,database,Australia,AustLII Australasian Legal Information Institute,,,,,,,,,,,,,,,,,
