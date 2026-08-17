@@ -334,13 +334,13 @@ To research resources for each country, explore:
 
 ## Status
 
-**Continent:** {continent}  
-**Total Countries:** [To be documented]  
-**Progress:** In Progress  
+**Continent:** {continent}
+**Total Countries:** [To be documented]
+**Progress:** In Progress
 
 ---
 
-*Parent Issue:* World — Global Archives Research Initiative  
+*Parent Issue:* World — Global Archives Research Initiative
 *Sibling Continents:* Africa, Asia, Europe, North America, South America, Oceania
 """
 
@@ -349,11 +349,13 @@ def generate_country_issue_body(country: str, continent: str, divisions: List[st
     
     divisions_section = ""
     if divisions:
+        div_list = "\n".join([f"- {div}" for div in divisions[:20]])
+        more_text = "\n... and more" if len(divisions) > 20 else ""
         divisions_section = f"""## Administrative Divisions
 
 This country contains the following administrative divisions, which may each have regional libraries and archives:
 
-{''.join(f'- {div}' + '\n' for div in divisions[:20])}{'... and more' if len(divisions) > 20 else ''}
+{div_list}{more_text}
 
 Consider searching for local resources in each of these regions.
 
@@ -361,7 +363,7 @@ Consider searching for local resources in each of these regions.
     
     return f"""# {country} — Libraries, Archives & Databases
 
-**Continent:** {continent}  
+**Continent:** {continent}
 **Country:** {country}
 
 ## Research Mission
@@ -522,9 +524,9 @@ Add any relevant notes here about:
 
 ---
 
-**Continent:** {continent}  
-**Status:** Research in Progress  
-**Last Updated:** [Date]  
+**Continent:** {continent}
+**Status:** Research in Progress
+**Last Updated:** [Date]
 
 *Parent Issue:* {continent} — Comprehensive Library & Archive Search
 """
@@ -645,7 +647,7 @@ class IssueGenerator:
             
             if issue:
                 country_issues[country_name] = issue
-                print(f"  [{idx}/{total_countries}] {country_name} → {continent}")
+                print(f"  [{idx}/{total_countries}] {country_name} -> {continent}")
             
             # Small delay every 10 issues to be respectful to GitHub API
             if idx % 10 == 0:
