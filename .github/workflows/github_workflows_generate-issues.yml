@@ -2,18 +2,17 @@ name: Generate World Archives Issues
 
 on:
   workflow_dispatch:
-    inputs:
-      token:
-        description: 'GitHub Personal Access Token (with repo scope)'
-        required: true
-        type: string
+
+permissions:
+  issues: write
+  contents: read
 
 jobs:
   generate-issues:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4.2.1
+        uses: actions/checkout@v5
 
       - name: Set up Python
         uses: actions/setup-python@v5.1.0

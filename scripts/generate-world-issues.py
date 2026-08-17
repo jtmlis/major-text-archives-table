@@ -14,7 +14,7 @@ import json
 import requests
 import argparse
 import time
-from typing import Dict, List, Set
+from typing import Dict, List, Set, Optional
 from collections import defaultdict
 
 # Country to Continent mapping
@@ -34,7 +34,7 @@ COUNTRY_TO_CONTINENT = {
     'South Africa': 'Africa', 'South Sudan': 'Africa', 'Sudan': 'Africa', 'Tanzania': 'Africa',
     'Togo': 'Africa', 'Tunisia': 'Africa', 'Uganda': 'Africa', 'Zambia': 'Africa', 'Zimbabwe': 'Africa',
     'Somaliland': 'Africa',
-    
+
     # Asia
     'Afghanistan': 'Asia', 'Armenia': 'Asia', 'Azerbaijan': 'Asia', 'Bahrain': 'Asia',
     'Bangladesh': 'Asia', 'Bhutan': 'Asia', 'People\'s Republic of China': 'Asia', 'Georgia': 'Asia',
@@ -48,7 +48,7 @@ COUNTRY_TO_CONTINENT = {
     'Tajikistan': 'Asia', 'Thailand': 'Asia', 'Timor-Leste': 'Asia', 'Turkey': 'Asia',
     'Turkmenistan': 'Asia', 'United Arab Emirates': 'Asia', 'Uzbekistan': 'Asia', 'Vietnam': 'Asia',
     'Yemen': 'Asia', 'Kingdom of the Netherlands': 'Asia', 'Brunei': 'Asia',
-    
+
     # Europe
     'Albania': 'Europe', 'Andorra': 'Europe', 'Austria': 'Europe', 'Belarus': 'Europe',
     'Belgium': 'Europe', 'Bosnia and Herzegovina': 'Europe', 'Bulgaria': 'Europe', 'Croatia': 'Europe',
@@ -62,7 +62,7 @@ COUNTRY_TO_CONTINENT = {
     'Russia': 'Europe', 'San Marino': 'Europe', 'Serbia': 'Europe', 'Slovakia': 'Europe',
     'Slovenia': 'Europe', 'Spain': 'Europe', 'Sweden': 'Europe', 'Switzerland': 'Europe',
     'Ukraine': 'Europe', 'United Kingdom': 'Europe', 'Kingdom of Denmark': 'Europe',
-    
+
     # North America
     'Antigua and Barbuda': 'North America', 'The Bahamas': 'North America', 'Barbados': 'North America',
     'Belize': 'North America', 'Canada': 'North America', 'Costa Rica': 'North America',
@@ -73,13 +73,13 @@ COUNTRY_TO_CONTINENT = {
     'Saint Kitts and Nevis': 'North America', 'Saint Lucia': 'North America',
     'Saint Vincent and the Grenadines': 'North America', 'Trinidad and Tobago': 'North America',
     'United States': 'North America',
-    
+
     # South America
     'Argentina': 'South America', 'Bolivia': 'South America', 'Brazil': 'South America',
     'Chile': 'South America', 'Colombia': 'South America', 'Ecuador': 'South America',
     'Guyana': 'South America', 'Paraguay': 'South America', 'Peru': 'South America',
     'Suriname': 'South America', 'Uruguay': 'South America', 'Venezuela': 'South America',
-    
+
     # Oceania
     'Australia': 'Oceania', 'Fiji': 'Oceania', 'Kiribati': 'Oceania',
     'Marshall Islands': 'Oceania', 'Federated States of Micronesia': 'Oceania',
@@ -242,8 +242,8 @@ A comprehensive, machine-readable database of global text archives and knowledge
 
 ---
 
-**Status:** Active Research Project  
-**Last Updated:** 2026  
+**Status:** Active Research Project
+**Last Updated:** 2026
 **Contributors Welcome:** Please help expand this global knowledge base!
 """
 
@@ -346,7 +346,7 @@ To research resources for each country, explore:
 
 def generate_country_issue_body(country: str, continent: str, divisions: List[str] = None) -> str:
     """Generate the body for a country issue."""
-    
+
     divisions_section = ""
     if divisions:
         div_list = "\n".join([f"- {div}" for div in divisions[:20]])
@@ -360,7 +360,7 @@ This country contains the following administrative divisions, which may each hav
 Consider searching for local resources in each of these regions.
 
 """
-    
+
     return f"""# {country} — Libraries, Archives & Databases
 
 **Continent:** {continent}
@@ -533,7 +533,15 @@ Add any relevant notes here about:
 
 class IssueGenerator:
     """Generate GitHub issues for the world archives project."""
-    
+
+    # Delay between individual issue creates. GitHub enforces an
+    # undocumented secondary rate limit on content-creation endpoints
+    # (roughly ~20/minute in bursts), so we stay well under that.
+    ISSUE_DELAY_SECONDS = 2.0
+    # Extra pause every N issues to further avoid secondary rate limits.
+    BATCH_SIZE = 10
+    BATCH_PAUSE_SECONDS = 5
+
     def __init__(self, token: str, owner: str, repo: str):
         self.token = token
         self.owner = owner
@@ -544,15 +552,58 @@ class IssueGenerator:
             "Accept": "application/vnd.github.v3+json"
         }
         self.issue_cache = {}  # Map of {title: issue_number}
-        
-    def create_issue(self, title: str, body: str, labels: List[str] = None) -> int:
-        """Create a single GitHub issue."""
+        self.existing_titles = {}  # Map of {title: issue_number}, pre-populated from repo
+
+    def load_existing_issues(self):
+        """
+        Fetch all existing open+closed issues in the repo so re-runs are
+        idempotent: if an issue with a matching title already exists, we
+        reuse it instead of creating a duplicate.
+        """
+        print("Loading existing issues to avoid duplicates...")
+        page = 1
+        while True:
+            try:
+                response = requests.get(
+                    self.base_url,
+                    headers=self.headers,
+                    params={"state": "all", "per_page": 100, "page": page}
+                )
+                response.raise_for_status()
+            except requests.exceptions.RequestException as e:
+                print(f"⚠ Could not load existing issues (continuing without dedup): {e}")
+                return
+
+            batch = response.json()
+            if not batch:
+                break
+
+            for issue in batch:
+                # Skip pull requests, which also show up in the issues endpoint
+                if "pull_request" in issue:
+                    continue
+                self.existing_titles[issue["title"]] = issue["number"]
+
+            if len(batch) < 100:
+                break
+            page += 1
+
+        print(f"Found {len(self.existing_titles)} existing issues.")
+
+    def create_issue(self, title: str, body: str, labels: List[str] = None) -> Optional[int]:
+        """Create a single GitHub issue, or reuse an existing one with the same title."""
+        if title in self.existing_titles:
+            issue_number = self.existing_titles[title]
+            self.issue_cache[title] = issue_number
+            print(f"↷ Skipping (already exists) #{issue_number}: {title}")
+            return issue_number
+
         payload = {
             "title": title,
             "body": body,
             "labels": labels or []
         }
-        
+
         try:
             response = requests.post(
                 self.base_url,
@@ -563,16 +614,63 @@ class IssueGenerator:
             issue = response.json()
             issue_number = issue['number']
             self.issue_cache[title] = issue_number
+            self.existing_titles[title] = issue_number
             print(f"✓ Created issue #{issue_number}: {title}")
-            time.sleep(0.5)  # Rate limiting
+            time.sleep(self.ISSUE_DELAY_SECONDS)
             return issue_number
         except requests.exceptions.RequestException as e:
-            print(f"✗ Failed to create issue '{title}': {e}")
+            status = getattr(e.response, "status_code", None)
+            print(f"✗ Failed to create issue '{title}' (status {status}): {e}")
+            # Back off harder on rate limit responses, then let the caller continue.
+            if status in (403, 429):
+                print("  Possible rate limit hit — pausing before continuing...")
+                time.sleep(30)
             return None
-    
+
+    def link_sub_issue(self, parent_number: int, child_number: int):
+        """
+        Attach child_number as a sub-issue of parent_number using GitHub's
+        sub-issues REST API. Requires the repo/org to have sub-issues enabled;
+        failures here are logged but non-fatal, since the issue itself still
+        exists and is still readable/searchable even without the link.
+        """
+        url = f"https://api.github.com/repos/{self.owner}/{self.repo}/issues/{parent_number}/sub_issues"
+        payload = {"sub_issue_id": self._get_issue_id(child_number)}
+        if payload["sub_issue_id"] is None:
+            print(f"  ⚠ Could not resolve internal id for issue #{child_number}; skipping sub-issue link")
+            return
+
+        try:
+            response = requests.post(url, headers=self.headers, json=payload)
+            if response.status_code in (200, 201):
+                print(f"  ↳ Linked #{child_number} as sub-issue of #{parent_number}")
+            elif response.status_code == 422:
+                # Already linked, or feature not available — not fatal
+                print(f"  · #{child_number} already linked to #{parent_number} (or link unsupported)")
+            else:
+                response.raise_for_status()
+            time.sleep(0.5)
+        except requests.exceptions.RequestException as e:
+            print(f"  ⚠ Failed to link #{child_number} under #{parent_number}: {e}")
+
+    def _get_issue_id(self, issue_number: int) -> Optional[int]:
+        """Sub-issues API needs the issue's internal `id`, not its `number`."""
+        try:
+            response = requests.get(
+                f"https://api.github.com/repos/{self.owner}/{self.repo}/issues/{issue_number}",
+                headers=self.headers
+            )
+            response.raise_for_status()
+            return response.json()["id"]
+        except requests.exceptions.RequestException as e:
+            print(f"  ⚠ Failed to fetch id for issue #{issue_number}: {e}")
+            return None
+
     def generate_all_issues(self, countries_file: str, divisions_file: str):
         """Generate all issues for the world."""
-        
+
+        self.load_existing_issues()
+
         # Load country data
         countries = {}
         with open(countries_file, 'r', encoding='utf-8') as f:
@@ -580,7 +678,7 @@ class IssueGenerator:
             for row in reader:
                 if row['countryLabel']:
                     countries[row['countryLabel']] = row['country']
-        
+
         # Load divisions data
         divisions_by_country = defaultdict(list)
         with open(divisions_file, 'r', encoding='utf-8') as f:
@@ -590,20 +688,21 @@ class IssueGenerator:
                 division = row['entityLabel']
                 if country and division:
                     divisions_by_country[country].append(division)
-        
+
         # Create World issue
         print("\n[1/3] Creating World issue...")
+        world_title = "🌍 World — Global Archives Research Initiative"
         world_body = generate_world_issue_body()
         world_issue = self.create_issue(
-            "🌍 World — Global Archives Research Initiative",
+            world_title,
             world_body,
             labels=["world-archives", "research", "global"]
         )
-        
+
         if not world_issue:
             print("Failed to create world issue. Aborting.")
             return
-        
+
         # Create continent issues
         print("\n[2/3] Creating continent issues...")
         continent_issues = {}
@@ -611,15 +710,17 @@ class IssueGenerator:
             continent_body = generate_continent_issue_body(continent)
             emoji = CONTINENT_DETAILS[continent]['emoji']
             tag = CONTINENT_DETAILS[continent]['tag']
-            
+            title = f"{emoji} {continent} — country library / archive / database searches"
+
             issue = self.create_issue(
-                f"{emoji} {continent} — country library / archive / database searches",
+                title,
                 continent_body,
                 labels=[tag, "continent", "research"]
             )
             if issue:
                 continent_issues[continent] = issue
-        
+                self.link_sub_issue(world_issue, issue)
+
         # Create country issues
         print("\n[3/3] Creating country issues...")
         country_issues = {}
@@ -629,30 +730,37 @@ class IssueGenerator:
             if continent == 'Unknown':
                 print(f"⚠ Skipping {country_name}: continent not mapped")
                 continue
-            
+
+            if continent not in continent_issues:
+                print(f"⚠ Skipping {country_name}: parent continent issue for {continent} not available")
+                continue
+
             divisions = divisions_by_country.get(country_name, [])
             body = generate_country_issue_body(country_name, continent, divisions)
-            
+
             labels = [
                 "country",
                 "research",
                 f"continent-{continent.lower().replace(' ', '-')}"
             ]
-            
+
+            title = f"📍 {country_name}"
             issue = self.create_issue(
-                f"📍 {country_name}",
+                title,
                 body,
                 labels=labels
             )
-            
+
             if issue:
                 country_issues[country_name] = issue
+                self.link_sub_issue(continent_issues[continent], issue)
                 print(f"  [{idx}/{total_countries}] {country_name} -> {continent}")
-            
-            # Small delay every 10 issues to be respectful to GitHub API
-            if idx % 10 == 0:
-                time.sleep(2)
-        
+
+            # Extra pause every BATCH_SIZE issues to stay well clear of
+            # GitHub's secondary rate limit for issue creation.
+            if idx % self.BATCH_SIZE == 0:
+                time.sleep(self.BATCH_PAUSE_SECONDS)
+
         # Summary
         print("\n" + "="*60)
         print("ISSUE GENERATION COMPLETE")
@@ -660,10 +768,10 @@ class IssueGenerator:
         print(f"✓ World issue: #{world_issue}")
         print(f"✓ Continent issues: {len(continent_issues)}")
         print(f"✓ Country issues: {len(country_issues)}")
-        print(f"✓ Total issues created: {1 + len(continent_issues) + len(country_issues)}")
-        print("\nNote: Issues have been created but sub-issue relationships may need")
-        print("to be configured manually via GitHub's UI or via additional API calls")
-        print("to update issue bodies with cross-references.")
+        print(f"✓ Total issues created or reused: {1 + len(continent_issues) + len(country_issues)}")
+        print("\nSub-issue relationships were linked via GitHub's sub-issues API where")
+        print("supported. If your org/repo doesn't have sub-issues enabled, links were")
+        print("skipped but all issues were still created successfully.")
 
 def main():
     parser = argparse.ArgumentParser(description='Generate global world archives issues')
@@ -672,9 +780,9 @@ def main():
     parser.add_argument('--repo', required=True, help='Repository name')
     parser.add_argument('--countries', default='data/countries.csv', help='Countries CSV file')
     parser.add_argument('--divisions', default='data/list-of-countries-and-their-administrative-divisions.csv', help='Divisions CSV file')
-    
+
     args = parser.parse_args()
-    
+
     generator = IssueGenerator(args.token, args.owner, args.repo)
     generator.generate_all_issues(args.countries, args.divisions)
 
