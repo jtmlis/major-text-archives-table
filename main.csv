@@ -10,7 +10,6 @@ https://lant.nt.gov.au/,https://nt.gov.au/,state,library,Australia,"Library & Ar
 https://www.library.act.gov.au/,http://act.gov.au/,state,library,Australia,"ACT Heritage Library",,no,,,,,,,,,,,,,,,
 https://libraries.tas.gov.au/,http://tas.gov.au/,state,library,Australia,"State Library of Tasmania",,no,,,,,,,,,,,,,,,
 https://www.catalog.slsa.sa.gov.au/,https://www.sa.gov.au/,state,library,Australia,"State Library of South Australia",,yes,,,,,,,,,,"308 000 000",,,,,
-"library website","base url",type,"type 2",country,name,available,wildcards,"funding ",size,"total collection",books,journals,gov-docs,media,dissertations,archival-manuscripts,newspaper-articles,,"subset of","duplicate of",original,"bulk data"
 https://www.sl.nsw.gov.au/,https://www.sa.gov.au/,state,library,Australia,"State Library of New South Wales",,,,,,,,,,,,,,,,,
 https://gutenberg.net.au/,https://gutenberg.net.au/,open,library,Australia,"Project Gutenberg Australia",,,,,,,"44 000 000",,,,,,,,,,
 https://pandora.nla.gov.au/,https://www.library.gov.au/,national,"web archive",Australia,"Pandora archive",,,,,,,,,,,,,,,,,
@@ -22,7 +21,7 @@ https://www.acu.edu.au/library,https://www.acu.edu.au/,academic,library,Australi
 https://library.avondale.edu.au/,https://www.avondale.edu.au/,academic,library,Australia,"Avondale University Library",,,,,,,,,,,,,,,,,
 https://bond.edu.au/library,https://bond.edu.au/,academic,library,Australia,"Bond University Library",,,,,,,,,,,,,,,,,
 https://library.cqu.edu.au/,https://www.cqu.edu.au/,academic,library,Australia,"CQUniversity Library",,,,,,,,,,,,,,,,,
-249764270,https://www.cdu.edu.au/,academic,library,Australia,"Charles Darwin University Library",,,,,,,,,,,,,,,,,
+https://www.cdu.edu.au/library,https://www.cdu.edu.au/,academic,library,Australia,"Charles Darwin University Library",,,,,,,,,,,,,,,,,
 https://www.csu.edu.au/division/library,https://www.csu.edu.au/,academic,library,Australia,"Charles Sturt University Library",,,,,,,,,,,,,,,,,
 https://library.curtin.edu.au/,https://www.curtin.edu.au/,academic,library,Australia,"Curtin University Library",,,,,,,,,,,,,,,,,
 https://www.deakin.edu.au/library,https://www.deakin.edu.au/,academic,library,Australia,"Deakin University Library",,,,,,,,,,,,,,,,,
@@ -67,75 +66,27 @@ https://researchdata.edu.au/,https://researchdata.edu.au/,national,archive,Austr
 https://researchers.mq.edu.au/en/datasets/,https://researchers.mq.edu.au/en/datasets/,academic,datasets,Australia,"Macquarie University",,,,,,,,,,,,,,,,,
 https://sydneycorpuslab.com/,https://sydneycorpuslab.com/,"research lab",datasets,Australia,"Sydney Corpus Lab",,,,,,,,,,,,,,,,,
 https://www.nfsa.gov.au/,,national,media,Australia,"National Film and Sound Archive of Australia ",,,,,,,,,,,,,,,,,
-"
-",,,,,,,,,,,,,,,,,,,,,,
 https://www.abs.gov.au/,,national,datasets,Australia,"Australian Bureau of Statistics",,,,,,,,,,,,,,,,,
-"
-",,,,,,,,,,,,,,,,,,,,,,
 https://www.ga.gov.au/,,national,,Australia,"Geoscience Australia",,,,,,,,,,,,,,,,,
-"
-",,,,,,,,,,,,,,,,,,,,,,
 https://data.gov.au/,,national,,Australia,"Australian open government data",,,,,,,,,,,,,,,,,
-"
-",,,,,,,,,,,,,,,,,,,,,,
 https://www.legislation.gov.au/,,national,,Australia,"Federal Register of Legislation",,,,,,,,,,,,,,,,,
-"
-",,,,,,,,,,,,,,,,,,,,,,
 https://www.ipaustralia.gov.au/,,national,,Australia,"Australian intellectual property (IP)",,,,,,,,,,,,,,,,,
-"
-",,,,,,,,,,,,,,,,,,,,,,
 https://www.austlit.edu.au/austlit/page/5961938,https://www.austlit.edu.au/,national,,Australia,AustLit,,,,,,,,,,,,,,,,,
-"
-",,,,,,,,,,,,,,,,,,,,,,
 https://www.ausstage.edu.au/,,national,,Australia,"Australian Live Performance Database",,,,,,,,,,,,,,,,,
-"
-",,,,,,,,,,,,,,,,,,,,,,
 https://www.ldaca.edu.au/,,national,,Australia,"Language Data Commons of Australia",,,,,,,,,,,,,,,,,
-"
-",,,,,,,,,,,,,,,,,,,,,,
 https://data.csiro.au/,,national,,Australia,"Australia's National Science Agency.",,,,,,,,,,,,,,,,,
-"
-",,,,,,,,,,,,,,,,,,,,,,
 https://data.aad.gov.au/,,national,,Australia,"Australian Antarctic Data Centre",,,,,,,,,,,,,,,,,
-"
-",,,,,,,,,,,,,,,,,,,,,,
 https://www.records.nsw.gov.au/,,state,,Australia,"NSW State Archives Collection",,,,,,,,,,,,,,,,,
-"
-",,,,,,,,,,,,,,,,,,,,,,
 https://prov.vic.gov.au/,,state,,Australia,"Public Record Office Victoria",,,,,,,,,,,,,,,,,
-"
-",,,,,,,,,,,,,,,,,,,,,,
 https://www.archives.qld.gov.au/,,state,,Australia," Queensland State Archives ",,,,,,,,,,,,,,,,,
-"
-",,,,,,,,,,,,,,,,,,,,,,
 https://www.sro.wa.gov.au/,,state,,Australia," State Records Office of Western Australia ",,,,,,,,,,,,,,,,,
-"
-",,,,,,,,,,,,,,,,,,,,,,
 https://archives.sa.gov.au/,,state,,Australia,"State Records of South Australia",,,,,,,,,,,,,,,,,
-"
-",,,,,,,,,,,,,,,,,,,,,,
 https://www.archives.act.gov.au/,,state,,Australia," ArchivesACT",,,,,,,,,,,,,,,,,
-"
-",,,,,,,,,,,,,,,,,,,,,,
 https://www.rba.gov.au/,,national,,Australia,"Reserve Bank of Australia",,,,,,,,,,,,,,,,,
-"
-",,,,,,,,,,,,,,,,,,,,,,
 https://www.sclqld.org.au/,,state,,Australia,"Supreme Court Library Queensland",,,,,,,,,,,,,,,,,
-"
-",,,,,,,,,,,,,,,,,,,,,,
 https://australian.museum/,,national,,Australia,"Australian Museum												",,,,,,,,,,,,,,,,,
-"
-",,,,,,,,,,,,,,,,,,,,,,
 https://www.nma.gov.au/,,national,,Australia,"National Museum of Australia",,,,,,,,,,,,,,,,,
-"
-",,,,,,,,,,,,,,,,,,,,,,
 https://libguides.csiro.au/,,academic,,Australia,"Commonwealth Scientific and Industrial Research Organisation (CSIRO)",,,,,,,,,,,,,,,,,
-"
-",,,,,,,,,,,,,,,,,,,,,,
 https://search.informit.org/,,private,,Australia,Informit,,,,,,,,,,,,,,,,,
-"
-",,,,,,,,,,,,,,,,,,,,,,
 https://lant.nt.gov.au/,,state,,Australia,"Library & Archives NT",,,,,,,,,,,,,,,,,
-"
-",,,,,,,,,,,,,,,,,,,,,,
 https://collections.museumsvictoria.com.au/,,state,,Australia,"Museums Victoria Collections",,,,,,,,,,,,,,,,,
